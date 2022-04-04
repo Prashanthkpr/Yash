@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>Yash Team Works| Users</title>
+{% endblock %}
+{% block content %}
+    <div class="mt-2">
+        {% if users %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Projects</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>
+                                <a href="" style='color:black;'>
+                                <strong>{{user}}</strong></a>
+                            </td>
+                            <td>{{user.email|default:'-'}}</td>
+                            <td>{{user.date_of_birth|date:'d-m-Y'|default:'-'}}</td>
+                            <td>{{user.get_gender_display|default:'-'}}</td>
+                            <td>
+                                <ol>
+                                    {% for project in user.project_set.all %}
+                                        <li><a href="{% url 'Projects:details' project.id %}" style='color:black;font-weight:bold;'>{{ project }}</a> (Team Member)</li>
+                                    {% endfor %}
+                                    {% for project in user.prject_created_by.all %}
+                                        <li><a href="{% url 'Projects:details' project.id %}" style='color:black;font-weight:bold;'>{{ project }}</a> (Created)</li>
+                                    {% endfor %}
+                                    {% for project in user.prject_manager.all %}
+                                        <li><a href="{% url 'Projects:details' project.id %}" style='color:black;font-weight:bold;'>{{ project }}</a> (Manager)</li>
+                                    {% endfor %}
+                                    {% for project in user.prject_team_leader.all %}
+                                        <li><a href="{% url 'Projects:details' project.id %}" style='color:black;font-weight:bold;'>{{ project }}</a> (Team Leader)</li>
+                                    {% endfor %}
+                                </ol>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <h1 class="text-center m-5">Opps, No users found.</h1>
+        {% endif %}
+    </div>
+{% endblock %}

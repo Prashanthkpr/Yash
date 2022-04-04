@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load mathfilters %}
+{% block title %}
+    <title>Yash Team Works| Project Documets</title>
+{% endblock %}
+{% block content %}
+    <div class="m-2" style="display: flow-root;">
+        <a class="btn btn-primary float-right" href="{% url 'Projects:project-documents-upload' project_obj.id %}">
+            <i class="fa fa-plus"></i>&nbsp;New Upload
+        </a>
+    </div>
+    <div class="card m-2">
+        <div class="card-body">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-primary" style="border: 1px solid lightgrey; padding: 5px; margin-bottom: 10px;">
+                <div class="panel-heading active" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" 
+                            aria-expanded="true" aria-controls="collapseOne" style="background: #2196f3;margin:-6px;">
+                            <strong>{{project_obj.name }} -  Documents</strong>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in show" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <form class="document-search-form">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <select class="form-control selectpciker" name="name" data-live-search="true" data-size="5">
+                                            <option value="">---</option>
+                                            {% for name in filters.names %}
+                                                <option value="{{name}}">{{name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Uploaded By</label>
+                                        <select class="form-control selectpciker" name="user" data-live-search="true" data-size="5">
+                                            <option value="">---</option>
+                                            {% for uploaded_user in filters.uploaded_users %}
+                                                <option value="{{uploaded_user.id}}">{{uploaded_user}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Document</label>
+                                        <select class="form-control selectpciker" name="file_name" data-live-search="true" data-size="5">
+                                            <option value="">---</option>
+                                            {% for file_name in filters.file_names %}
+                                                <option value="{{file_name}}">{{file_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Document Type</label>
+                                        <select class="form-control selectpciker" name="file_type">
+                                            <option value="">---</option>
+                                            <option value="pdf">PDF</option>
+                                            <option value="doc,docx">DOC / DOCX</option>
+                                            <option value="ppt,pptx">PPT /PPTX</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Uploaded Start Date</label>
+                                        <input class="form-control" type="date" name="start_date" 
+                                            min="{{filters.start_date.date|date:'d-m-Y'}}" max="{{filters.end_date.date|date:'d-m-Y'}}" />
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Uploaded End Date</label>
+                                        <input class="form-control" type="date" name="end_date"
+                                        min="{{filters.start_date.date}}" max="{{filters.end_date.date}}" />
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Search By Name, Keywords and  Description</label>
+                                        <input class="from-control w-100 document_search_text" type="text" name="search_term" 
+                                            placeholder="Search By Name, Keywords and  Description"/>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <button class="btn btn-default ml-1 mt-4 document-search-clear-button btn-md" type="reset">
+                                        <i class="fa fa-clear"></i>&nbsp;Clear
+                                    </button>
+                                    <button class="btn btn-primary ml-5 mt-4 document-search-button btn-md" type="button">
+                                        <i class="fa fa-search"></i>&nbsp;Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="documents-list-div"></div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            get_documents_list = (search_data='') =>{
+                $('.loader').fadeIn()
+                let url = "{% url 'Projects:project-documents-list' project_obj.id %}"
+                url = url + `?${search_data}`
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(result){
+                        $('.documents-list-div').html(result)
+                        $('.loader').fadeOut('slow')
+                    }
+              });
+            }
+            get_documents_list()
+            $(document).on('click', '.delete-document', function(e){
+                e.preventDefault()
+                $(this).prop('disabled', true)
+                if(confirm("Are you sure want to delete the Document?. This action can't undo.")){
+                    let url = $(this).attr('delete-url')
+                    $.ajax({
+                        type: "GET",
+                        url: url,
+                        success: function(resultData){
+                            window.location.reload()
+                        }
+                  });
+                }
+                else{
+                    return false
+                }
+            })    
+            $(document).on('click', '.document-search-button', function(e){
+                e.preventDefault()
+                $(this).prop('disabled', true)
+                get_documents_list($('.document-search-form').serialize())
+                $(this).prop('disabled', false)
+            })
+            $(document).on('click', '.document-search-clear-button', function(e){
+                e.preventDefault()
+                $(this).prop('disabled', true)
+                $('.document-search-form').find('input, select, .selectpicker').val('').trigger('change');
+                get_documents_list()
+                $(this).prop('disabled', false)
+            })
+            $('.panel-collapse').on('show.bs.collapse', function () {
+                $(this).siblings('.panel-heading').addClass('active');
+              });
+            
+              $('.panel-collapse').on('hide.bs.collapse', function () {
+                $(this).siblings('.panel-heading').removeClass('active');
+              }); 
+        })
+    </script>
+    <style>
+          .panel-heading {
+            padding: 0;
+            border:0;
+          }
+          .panel-title>a, .panel-title>a:active{
+            display:block;
+            padding:15px;
+            color:#555;
+            font-size:16px;
+            font-weight:bold;
+            text-transform:uppercase;
+            letter-spacing:1px;
+            word-spacing:3px;
+            text-decoration:none;
+          }
+          .panel-heading  a:before {
+            font: var(--fa-font-solid);
+            content: "\f0ab";
+            float: right;
+            transition: all 0.5s;
+          }
+          .panel-heading.active a:before {
+            -webkit-transform: rotate(180deg);
+            -moz-transform: rotate(180deg);
+            transform: rotate(180deg);
+          } 
+    </style>
+{% endblock %}

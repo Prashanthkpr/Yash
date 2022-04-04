@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    <title>Yash Team Works | User</title>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12 p-2">
+                <div class="card">
+                    <div class="card-header">
+                        User Update
+                    </div>
+                    <div class="card-body">
+                        <form action="." method="post">
+                            {% if failure %}
+                                <p class="p-1 text-center">Please check the errors.</p>
+                            {% endif %}
+                            {% for error in user_update_form.non_field_errors %}
+                                <p class="p-1 text-center from-errors"> {{ error }} </p>
+                            {% endfor %}
+                            {% csrf_token %}
+                            <div class="row">
+                                {% for field in user_update_form %}
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                                            {{ field }}
+                                            {{ field.help_text|safe }}
+                                            {{ field.errors }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <div class="col-12">
+                                    <button class="btn btn-primary float-right" type="sumbit">Update</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 p-2">
+                <div class="card">
+                    <div class="card-header">User Password Reset</div>
+                    <div class="card-body">
+                        <form action="{% url 'UserManager:users-password-reset' request.user.id %}" method="post">
+                            {% if password_failure %}
+                                <p class="p-1 text-center">Please check the errors.</p>
+                            {% endif %}
+                            {% for error in user_password_reset_form.non_field_errors %}
+                                <p class="p-1 text-center from-errors"> {{ error }} </p>
+                            {% endfor %}
+                            {% csrf_token %}
+                            <div class="row">
+                                {% for field in user_password_reset_form %}
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                                            {{ field }}
+                                            {{ field.help_text|safe }}
+                                            {{ field.errors }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary float-right" type="sumbit">Reset Password</button>
+                                <button class="btn btn-default float-right mr-1" type="reset">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

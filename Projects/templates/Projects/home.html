@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>Yash Team Works| Projects</title>
+{% endblock %}
+{% block content %}
+    {% if request.user.is_superuser %}
+        <div class="m-2">
+            <a class="btn btn-primary float-right" href="{% url 'Projects:create' %}">
+                <i class="fa fa-plus"></i>&nbsp;Create Project
+            </a>
+        </div>
+        </br></br>
+    {% endif %}
+    <div class="mt-2">
+        {% if projects %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Name</th>
+                        <th>Project ID</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Manager</th>
+                        <th>Team Leader</th>
+                        {% if request.user.is_superuser %}
+                            <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td><a href="{% url 'Projects:details' project.id %}" style='color:black;'>
+                                <strong>{{project.name}}</strong></a>
+                            </td>
+                            <td>{{project.project_id|default:'-'}}</td>
+                            <td>{{project.start_date|date:'d-m-Y'|default:'-'}}</td>
+                            <td>{{project.end_date|date:'d-m-Y'|default:'-'}}</td>
+                            <td>{{project.manager|default:'-'}}</td>
+                            <td>{{project.team_leader|default:'-'}}</td>
+                            <td>
+                                {% if request.user.is_superuser or request.user == project.manager %}
+                                    <button class="btn btn-danger btn-sm delete-project" title="Delete Project" type="button" 
+                                        delete-url="{% url 'Projects:delete' project.id%}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    <a class="btn btn-primary btn-sm" href="{% url 'Projects:update' project.id %}" title="Edit Project">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+                                    {% endif %}
+                                <a class="btn btn-warning btn-sm" title="Project Documents" href="{% url 'Projects:project-documents-list-index' project.id %}">
+                                    <i class="fa-solid fa-file"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <h1 class="text-center m-5">Opps, No projects found.</h1>
+        {% endif %}
+    </div>
+    <script>
+        $(document).on('click', '.delete-project', function(e){
+            e.preventDefault()
+            if(confirm("It will delete the Project and all the related documents. This action can't undo. Are you sure want to delete the Project?. ")){
+                let url = $(this).attr('delete-url')
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(resultData){
+                        window.location.reload()
+                    }
+              });
+            }
+            else{
+                return false
+            }
+        })
+    </script>
+{% endblock %}

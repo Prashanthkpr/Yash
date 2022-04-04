@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>Yash Team Works| Project Details</title>
+{% endblock %}
+{% block content %}
+    <div class="card m-5">
+        <div class="card-header">
+            <strong>{{project_obj.name }} Project Details</strong>
+            <a class="float-right" href="{% url 'Projects:project-documents-list-index' project_obj.id %}">Project Documents</a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                    <strong><i class="fa-solid fa-book"></i> Project Name </strong>: {{ project_obj.name }}
+                    {% if project_obj.project_id %}
+                        ({{ project_obj.project_id }})
+                    {% endif %}
+                </div>
+                <div class="col-6">
+                    <strong><i class="fa-solid fa-user-gear"></i> Manager</strong>: {{ project_obj.manager|default:'-' }}
+                </div>
+                <div class="col-6">
+                    <strong><i class="fa-solid fa-universal-access"></i> Team Leader</strong>: {{ project_obj.team_leader|default:'-' }}
+                </div>
+                <div class="col-6">
+                    <strong><i class="fa-solid fa-calendar"></i> Start Date</strong>: {{ project_obj.start_date|date:'d-m-Y'|default:'-' }}
+                </div>
+                <div class="col-6">
+                    <strong><i class="fa-solid fa-calendar"></i> End Date</strong>: {{ project_obj.end_date|date:'d-m-Y'|default:'-' }}
+                </div>
+                <div class="col-12">
+                    <strong><i class="fa-solid fa-users"></i> Team Members</strong>: 
+                        <ol>
+                            {% for team_member in project_obj.team_members.all %}
+                                <li>{{ team_member }}</li>
+                            {% endfor %}
+                        </ol>
+                </div>
+                <div class="col-12">
+                    <h6><strong><i class="fa-solid fa-note-sticky"></i> Project Description</strong>:</h6> 
+                    {{ project_obj.description|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

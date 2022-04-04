@@ -1,0 +1,28 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load mathfilters %}
+{% block title %}
+    <title>Yash Team Works| Home</title>
+{% endblock %}
+{% block homecontent %}
+    <div class="topnav">
+        <a {% if '/' == request.path %}class="active"{% endif %} href="{% url 'Menu:home' %}">
+            <img src="{% static 'images/yash-logo.svg' %}" width="50" />
+            Team Works
+        </a>
+        <a {% if '/projects/' in request.path and '/documents/' not in request.path %}class="active"{% endif %} href="{% url 'Projects:home' %}">PROJECTS</a>
+        <a {% if '/documents/' in request.path %}class="active"{% endif %} href="{% url 'Projects:documents-list-index' %}">DOCUMENTS</a>
+        <a {% if '/users/' in request.path %}class="active"{% endif %} href="{% url 'UserManager:users-list' %}">USERS</a>
+        <a href="{% url 'UserManager:users-update' request.user.id %}" class="float-right">
+            <i class="fa fa-user"></i> {{request.user.get_full_name}}
+        </a></li>
+        <a href="{% url 'UserManager:logout' %}" class="float-right">Logout</a></li>
+        {% comment %} <a href="#" class="float-right"><i class="fa fa-bell" aria-hidden="true"></i></a> {% endcomment %}
+    </div>
+    <div class="container-fluid">
+        <img class="loader" src="{% static 'images/loading.gif' %}" width="100"/>
+        {% block content %} 
+            <h1 style="margin-top: 25%">Hi, {{request.user.get_full_name}}. Welcome to the Yash Technologies.</h1>
+        {% endblock %}
+    </div>
+{% endblock %}

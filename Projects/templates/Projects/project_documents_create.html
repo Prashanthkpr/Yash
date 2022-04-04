@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>Yash Team Works| Project Documents Upload</title>
+{% endblock %}
+{% block content %}
+    <div class="card m-5">
+        <div class="card-header"><strong>{{project_obj.name}} - Document Upload</strong></div>
+        <div class="card-body">
+            <form action="." method="post" enctype="multipart/form-data">
+                {% if failure %}
+                    <p class="p-1 text-center">Please check the errors.</p>
+                {% endif %}
+                {% for error in project_document_form.non_field_errors %}
+                    <p class="p-1 text-center from-errors"> {{ error }} </p>
+                {% endfor %}
+                {% csrf_token %}
+                <div class="row">
+                    {% for field in project_document_form %}
+                        {% if field.name == 'description' or field.name == 'keywords' %}
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                                    {{ field }}
+                                    {{ field.help_text|safe }}
+                                    {{ field.errors }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{field.label}}</label>
+                                    {{ field }}
+                                    {{ field.help_text|safe }}
+                                    {{ field.errors }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="col-12">
+                        <button class="btn btn-primary float-right" type="sumbit">Upload</button>
+                        <button class="btn btn-default float-right mr-1" type="reset">Clear</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(document).on('change', '#id_document', function(){
+            if(this.files[0].size > 30000000) {
+                alert("Please upload file less than 10MB. Thanks!!");
+                $(this).val('');
+                return false
+              }
+             let ftype = this.files[0].type
+             let fname = this.files[0].name
+             let fextension = fname.substring(fname.lastIndexOf('.')+1)
+             let file_type = $(this).attr('file-type')
+             let validExtensions = ["pdf", "doc", "docx", "txt", "ppt", "pptx"];
+             if ($.inArray(fextension, validExtensions) == -1){
+                 alert("This type of files are not allowed!");
+                 $(this).val('');
+                 return false;
+             }
+        })
+    </script>
+{% endblock %}
