@@ -30,7 +30,7 @@ CURRENT_ENV = 'dev'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = config(f'DEBUG_{CURRENT_ENV}', cast=bool)
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 
@@ -139,6 +139,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
     # '/var/www/static/',
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
