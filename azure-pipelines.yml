@@ -47,14 +47,13 @@ stages:
         python -m pip install --upgrade pip
         pip install setup
         pip install -r requirements.txt
-        python TeamWork/manage.py migrate
-        # python application/manage.py collectstatic  --noinput
+        python manage.py migrate
+        # python manage.py collectstatic  --noinput
       workingDirectory: $(projectRoot)
       displayName: "Install requirements"
 
     - script: |
         source antenv/bin/activate
-        pushd ./TeamWork
         python manage.py collectstatic  --noinput
         popd
       displayName: "Collect Static"
