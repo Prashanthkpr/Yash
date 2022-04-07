@@ -16,6 +16,8 @@ from django.contrib.messages import constants as messages
 
 from decouple import config
 
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +32,7 @@ CURRENT_ENV = 'dev'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = config(f'DEBUG_{CURRENT_ENV}', cast=bool)
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
