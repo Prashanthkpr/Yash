@@ -32,7 +32,7 @@ CURRENT_ENV = 'dev'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = config(f'DEBUG_{CURRENT_ENV}', cast=bool)
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'yashprojectsdocumentssearch.azurewebsites.net']
 
 
