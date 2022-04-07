@@ -34,6 +34,7 @@ CURRENT_ENV = 'dev'
 # DEBUG = config(f'DEBUG_{CURRENT_ENV}', cast=bool)
 DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'yashprojectsdocumentssearch.azurewebsites.net']
+CSRF_TRUSTED_ORIGINS = ['https://yashprojectsdocumentssearch.azurewebsites.net']
 
 
 # Application definition
