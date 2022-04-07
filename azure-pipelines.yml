@@ -1,8 +1,4 @@
 # Python Django
-# Test a Django project on multiple versions of Python.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
 trigger:
 - master
 
@@ -10,12 +6,8 @@ pool:
   vmImage: ubuntu-latest
 strategy:
   matrix:
-    Python35:
-      PYTHON_VERSION: '3.5'
-    Python36:
-      PYTHON_VERSION: '3.6'
-    Python37:
-      PYTHON_VERSION: '3.7'
+    Python39:
+      PYTHON_VERSION: '3.9'
   maxParallel: 3
 
 steps:
@@ -24,6 +16,15 @@ steps:
     versionSpec: '$(PYTHON_VERSION)'
     architecture: 'x64'
 
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Jobways2021(1)(bdc036dc-92b2-4ab4-88ba-56117dfa3ce1)'
+    appType: 'webAppLinux'
+    WebAppName: 
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    RuntimeStack: 'PYTHON|3.9'
+    StartupCommand: 'gunicorn --bind=0.0.0.0 --timeout 600 TeamWork.wsgi'
 - task: PythonScript@0
   displayName: 'Export project path'
   inputs:
