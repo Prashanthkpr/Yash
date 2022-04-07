@@ -28,12 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-f(ptd!vmrj*q5_o9hq)^6#n&w!4ri@ns5g6or@!tbe&3_taus@'
 
-CURRENT_ENV = 'dev'
+CURRENT_ENV = 'production'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = config(f'DEBUG_{CURRENT_ENV}', cast=bool)
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'yashprojectsdocumentssearch.azurewebsites.net']
+CSRF_TRUSTED_ORIGINS = ['https://yashprojectsdocumentssearch.azurewebsites.net']
 
 
 # Application definition
@@ -86,7 +87,7 @@ WSGI_APPLICATION = 'TeamWork.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-if CURRENT_ENV == 'dev' and False:
+if CURRENT_ENV == 'dev':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
