@@ -1,59 +1,101 @@
-# Python Django
+# Python to Linux Web App on Azure
+# Build your Python project and deploy it to Azure as a Linux Web App.
+# Change python version to one thats appropriate for your application.
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
 trigger:
 - master
+# - production_*
 
-pool:
-  vmImage: ubuntu-latest
-strategy:
-  matrix:
-    Python39:
-      PYTHON_VERSION: '3.9'
-  maxParallel: 3
+variables:
+  # Azure Resource Manager connection created during pipeline creation
+  azureServiceConnectionId: 'bdc036dc-92b2-4ab4-88ba-56117dfa3ce1'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(PYTHON_VERSION)'
-    architecture: 'x64'
+  # Web app name
+  webAppName: 'yashprojectsdocumentssearch'
+  # webAppName: 'jobwaysprod'
 
-- task: AzureRmWebAppDeployment@4
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'Jobways2021(1)(bdc036dc-92b2-4ab4-88ba-56117dfa3ce1)'
-    appType: 'webAppLinux'
-    WebAppName: 
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
-    RuntimeStack: 'PYTHON|3.9'
-    StartupCommand: 'gunicorn --bind=0.0.0.0 --timeout 600 TeamWork.wsgi'
-- task: PythonScript@0
-  displayName: 'Export project path'
-  inputs:
-    scriptSource: 'inline'
-    script: |
-      """Search all subdirectories for `manage.py`."""
-      from glob import iglob
-      from os import path
-      # Python >= 3.5
-      manage_py = next(iglob(path.join('**', 'manage.py'), recursive=True), None)
-      if not manage_py:
-          raise SystemExit('Could not find a Django project')
-      project_location = path.dirname(path.abspath(manage_py))
-      print('Found Django project in', project_location)
-      print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
 
-- script: |
-    python -m pip install --upgrade pip setuptools wheel
-    pip install -r requirements.txt
-    pip install unittest-xml-reporting
-  displayName: 'Install prerequisites'
+  # Environment name
+  environmentName: 'JobwaysTest'
+  # environmentName: 'jobwaysprod'
 
-- script: |
-    pushd '$(projectRoot)'
-    python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
-  displayName: 'Run tests'
+  # Project root folder. Point to the folder containing manage.py file.
+  projectRoot: $(System.DefaultWorkingDirectory)
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: "**/TEST-*.xml"
-    testRunTitle: 'Python $(PYTHON_VERSION)'
-  condition: succeededOrFailed()
+  # Python version: 3.7
+  pythonVersion: '3.9'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python $(pythonVersion)'
+
+    - script: |
+        python -m venv antenv
+        source antenv/bin/activate
+        python -m pip install --upgrade pip
+        pip install setup
+        pip install -r requirements.txt
+        python application/manage.py migrate
+        # python application/manage.py collectstatic  --noinput
+      workingDirectory: $(projectRoot)
+      displayName: "Install requirements"
+
+    - script: |
+        source antenv/bin/activate
+        pushd ./application
+        python manage.py collectstatic  --noinput
+        popd
+      displayName: "Collect Static"
+
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(projectRoot)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: 'Upload package'
+      artifact: drop
+
+- stage: Deploy
+  displayName: 'Deploy Web App'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeploymentJob
+    pool:
+      vmImage: $(vmImageName)
+    environment: $(environmentName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python version'
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App : jobways'
+            inputs:
+              azureSubscription: 'Jobways2021(bdc036dc-92b2-4ab4-88ba-56117dfa3ce1)'
+              appName: $(webAppName)
+              appType: 'webAppLinux'
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
