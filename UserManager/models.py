@@ -14,6 +14,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         error_messages={
             "unique": _("A user with that email address already exists."),
         },
+        help_text=_("Please provide Yash Email."),
+        
     )
     employee_code = models.PositiveIntegerField(unique=True)
     is_staff = models.BooleanField(
@@ -34,6 +36,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    resume_file_name = models.CharField(max_length=512, null=True)
+    resume_uploaded_file_name = models.CharField(max_length=512, null=True, blank=True)
+    resume_file_type = models.CharField(max_length=10, null=True)
+    resume_file_size = models.PositiveIntegerField(default=10)
+    resume_file_url = models.TextField(blank=True)
 
     objects = UserManager()
 

@@ -8,10 +8,10 @@
     <div class="topnav">
         <a {% if '/' == request.path %}class="active"{% endif %} href="{% url 'Menu:home' %}">
             <img src="{% static 'images/yash-logo.svg' %}" width="50" />
-            Team Works
+            Home
         </a>
         <a {% if '/projects/' in request.path and '/documents/' not in request.path %}class="active"{% endif %} href="{% url 'Projects:home' %}">PROJECTS</a>
-        <a {% if '/documents/' in request.path %}class="active"{% endif %} href="{% url 'Projects:documents-list-index' %}">DOCUMENTS</a>
+        <a {% if '/documents/' in request.path %}class="active"{% endif %} href="{% url 'Projects:documents-list-index' %}">CASE STUDIES</a>
         <a {% if '/users/' in request.path %}class="active"{% endif %} href="{% url 'UserManager:users-list' %}">USERS</a>
         <a href="{% url 'UserManager:users-update' request.user.id %}" class="float-right">
             <i class="fa fa-user"></i> {{request.user.get_full_name}}

@@ -115,3 +115,7 @@
  .display-inline{
      display: inline;
  }
+ .helptext{
+    color: lightslategray;
+    font-style: italic;
+ }

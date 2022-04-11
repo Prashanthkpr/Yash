@@ -13,7 +13,7 @@
     {% endif %}
     <div class="mt-2">
         {% if projects %}
-            <table class="table table-bordered">
+            <table class="table table-bordered"  style="background-color:white;">
                 <thead>
                     <tr>
                         <th>S.No</th>
@@ -23,9 +23,7 @@
                         <th>End Date</th>
                         <th>Manager</th>
                         <th>Team Leader</th>
-                        {% if request.user.is_superuser %}
-                            <th>Actions</th>
-                        {% endif %}
+                        <th width="10%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,7 +47,7 @@
                                     <a class="btn btn-primary btn-sm" href="{% url 'Projects:update' project.id %}" title="Edit Project">
                                         <i class="fa fa-pencil-alt"></i>
                                     </a>
-                                    {% endif %}
+                                {% endif %}
                                 <a class="btn btn-warning btn-sm" title="Project Documents" href="{% url 'Projects:project-documents-list-index' project.id %}">
                                     <i class="fa-solid fa-file"></i>
                                 </a>

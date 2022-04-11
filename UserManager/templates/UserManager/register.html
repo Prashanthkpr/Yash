@@ -15,7 +15,7 @@
                         <div class="p-1 text-center" >
                             <img src="{% static 'images/yash-logo.svg' %}" width="100" />
                         </div>
-                        <form class="login-form" method="post" action=".">
+                        <form class="login-form" method="post" action="." enctype="multipart/form-data">
                             {% if failure %}
                                 <p class="text-center login_error" style="color:red;">Please check the errors.</p>
                             {% endif %}
@@ -37,4 +37,23 @@
             </div>
         </div>
     </div>
+    <script>
+        $(document).on('change', '#id_resume', function(){
+            if(this.files[0].size > 3000000) {
+                alert("Please upload file less than 3MB. Thanks!!");
+                $(this).val('');
+                return false
+              }
+             let ftype = this.files[0].type
+             let fname = this.files[0].name
+             let fextension = fname.substring(fname.lastIndexOf('.')+1)
+             let file_type = $(this).attr('file-type')
+             let validExtensions = ["pdf", "doc", "docx"];
+             if ($.inArray(fextension, validExtensions) == -1){
+                 alert("This type of files are not allowed!");
+                 $(this).val('');
+                 return false;
+             }
+        })
+    </script>
 {% endblock %}

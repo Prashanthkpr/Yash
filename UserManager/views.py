@@ -1,4 +1,5 @@
-from multiprocessing import managers
+from datetime import datetime
+import pdb
 from urllib import request
 from django.db.models import Q
 from django.shortcuts import redirect, render, get_object_or_404
@@ -11,6 +12,7 @@ from Menu.common import LoginRequiredMixin
 from UserManager.models import *
 from UserManager.forms import *
 from Projects.models import *
+from Menu.azure import *
 # Create your views here.
 
 class LoginUser(View):
@@ -33,14 +35,33 @@ class RegisterUser(View):
         register_form = UserRegisterForm()
         return render(request, 'UserManager/register.html', {'register_form': register_form})
     def post(self, request):
-        register_form = UserRegisterForm(request.POST)
+        register_form = UserRegisterForm(request.POST, request.FILES)
         if register_form.is_valid():
-            user_obj = register_form.save()
-            user_obj.set_password(request.POST.get('password'))
-            user_obj.username = user_obj.email
-            user_obj.save()
-            messages.success(request, "User registered successfully." )
-            return redirect('/')
+            document_file_obj = request.FILES.get('resume')
+            resume_file_name = document_file_obj._name
+            resume_uploaded_file_name = f"{datetime.now()}_{document_file_obj._name}"
+            container_name = settings.PROJECT_DOCUMENTS_CONTAINER
+            document_upload_obj = upload_file_to_azure(
+                document_file_obj, container_name, resume_uploaded_file_name
+            )
+            if document_upload_obj.get('error_code') is None:
+                resume_file_size = document_file_obj.size
+                resume_file_type = resume_file_name.split('.')[-1]
+                resume_file_url = get_file_url(container_name, resume_uploaded_file_name)
+                user_obj = register_form.save(commit=False)
+                user_obj.resume_file_name = resume_file_name
+                user_obj.resume_uploaded_file_name = resume_uploaded_file_name
+                user_obj.resume_file_type = resume_file_type
+                user_obj.resume_file_size = resume_file_size
+                user_obj.resume_file_url = resume_file_url
+                user_obj = register_form.save()
+                user_obj.set_password(request.POST.get('password'))
+                user_obj.username = user_obj.email
+                user_obj.save()
+                messages.success(request, "User registered successfully." )
+                return redirect('/')
+            else:
+                messages.error(request, "Error, Resume upload failed." )
         messages.error(request, "Error, Please check the errors." )
         return render(request, 'UserManager/register.html', {'register_form': register_form, 'failure': True})
 
@@ -79,7 +100,7 @@ class UsersUpdate(LoginRequiredMixin, View):
             user_update_form = UserUpdateForm(instance=user)
             user_password_reset_form = UserPasswordResetForm(instance=user)
             return render(request, 'UserManager/user_update.html', 
-                {'user_update_form': user_update_form, 'user_password_reset_form': user_password_reset_form})
+                {'user_update_form': user_update_form, 'user_password_reset_form': user_password_reset_form, 'user': user})
         raise Http404("Page not found.")
     
     def post(self, request, user_id):
@@ -87,7 +108,25 @@ class UsersUpdate(LoginRequiredMixin, View):
         if user == request.user:
             user_update_form = UserUpdateForm(request.POST, instance=user)
             if user_update_form.is_valid():
-                user_update_form.save()
+                user_obj = user_update_form.save()
+                document_file_obj = request.FILES.get('resume')
+                if document_file_obj:
+                    resume_file_name = document_file_obj._name
+                    resume_uploaded_file_name = f"{datetime.now()}_{document_file_obj._name}"
+                    container_name = settings.PROJECT_DOCUMENTS_CONTAINER
+                    document_upload_obj = upload_file_to_azure(
+                        document_file_obj, container_name, resume_uploaded_file_name
+                    )
+                    if document_upload_obj.get('error_code') is None:
+                        resume_file_size = document_file_obj.size
+                        resume_file_type = resume_file_name.split('.')[-1]
+                        resume_file_url = get_file_url(container_name, resume_uploaded_file_name)
+                        user_obj.resume_file_name = resume_file_name
+                        user_obj.resume_uploaded_file_name = resume_uploaded_file_name
+                        user_obj.resume_file_type = resume_file_type
+                        user_obj.resume_file_size = resume_file_size
+                        user_obj.resume_file_url = resume_file_url
+                        user_obj.save()
                 messages.success(request, 'User updated successfully.')
                 return redirect('.')
             messages.error(request, 'Please check the errors.')

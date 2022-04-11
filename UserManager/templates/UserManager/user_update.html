@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load mathfilters %}
 {% load static %}
 {% block title %}
     <title>Yash Team Works | User</title>
@@ -12,7 +13,7 @@
                         User Update
                     </div>
                     <div class="card-body">
-                        <form action="." method="post">
+                        <form action="." method="post" enctype="multipart/form-data">
                             {% if failure %}
                                 <p class="p-1 text-center">Please check the errors.</p>
                             {% endif %}
@@ -26,10 +27,28 @@
                                         <div class="form-group">
                                             <label for="{{ field.id_for_label }}">{{field.label}}</label>
                                             {{ field }}
-                                            {{ field.help_text|safe }}
+                                            <i>{{ field.help_text|safe }}</i>
                                             {{ field.errors }}
                                         </div>
                                     </div>
+                                    {% if field.name == 'resume' %}
+                                        {% if user.resume_file_name %}
+                                            <div>
+                                                <i class="fas fa-file"></i> {{user.resume_file_name}}<br>
+                                                <a href='{{user.resume_file_url}}' target="_blank">
+                                                    <i class="fa fa-download"></i>&nbsp;Download
+                                                    {% if user.resume_file_size <= 1000000 %}
+                                                        ({{user.resume_file_size|div:"1024"|floatformat:"2" }} KB )
+                                                    {% else %}
+                                                        ({{user.resume_file_size|div:"1048576"|floatformat:"2" }} MB )
+                                                    {% endif %}
+                                                </a><br>
+                                                <a href='http://docs.google.com/gview?url={{user.resume_file_url}}&embedded=true' target="_blank">
+                                                    <i class="fas fa-eye"></i>&nbsp;View
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
                                 {% endfor %}
                                 <div class="col-12">
                                     <button class="btn btn-primary float-right" type="sumbit">Update</button>
